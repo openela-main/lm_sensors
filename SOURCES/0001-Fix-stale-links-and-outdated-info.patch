@@ -1,0 +1,486 @@
+From 90b9168cd44f8c641fcf10def830bcd7c53a30e9 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ond=C5=99ej=20Lyson=C4=9Bk?= <olysonek@redhat.com>
+Date: Sat, 1 Sep 2018 08:12:59 +0200
+Subject: [PATCH] Fix stale links and outdated info
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This combines several upstream commits, see below.
+
+(cherry picked from commit 6413b80847ec54792d026191c01cdb985441a28b)
+(cherry picked from commit be3679ae06b622b1d868271ddeb6ae8d12196d1f)
+(cherry picked from commit 17d62bd3180d01676834d8a901d9bb1216b2f979)
+(cherry picked from commit 8f54fe85e8c9015190a2c80b8297ea69b5111728)
+(cherry picked from commit 807f9b1529892c0ac89bca0c7ae781c59f9c8393)
+(cherry picked from commit 255804953e039a725df47c596e47f68554118ca5)
+(cherry picked from commit 012d76b9785b467cf219bf134d6610861de58a97)
+(cherry picked from commit 84f773b3ec8b75f377a68fd1436ea3ac6d11b170)
+
+Resolves: rhbz#1693347
+
+Signed-off-by: Ondřej Lysoněk <olysonek@redhat.com>
+---
+ CHANGES                             |  4 +++-
+ Makefile                            |  2 +-
+ README                              | 18 ++++++++++++-----
+ configs/Asus/P3-PH4C.conf           |  3 ++-
+ configs/Asus/P5B-E.conf             |  2 +-
+ configs/Asus/P5N32-E_SLI_Plus.conf  |  2 +-
+ configs/Biostar/N68S+.conf          |  2 +-
+ configs/Gigabyte/Z38MX-UD2H-B3.conf |  2 +-
+ doc/developers/lm_sensors.lsm       | 10 ++++------
+ doc/developers/release_checklist    | 30 ++++++++---------------------
+ doc/donations                       |  2 +-
+ doc/git                             |  2 +-
+ doc/progs                           |  2 +-
+ etc/sensors.conf.eg                 |  4 ++--
+ lib/libsensors.3                    |  3 +--
+ lib/sensors.conf.5                  |  5 +----
+ prog/detect/sensors-detect          |  6 +++---
+ prog/dump/isadump.8                 |  2 +-
+ prog/dump/isaset.8                  |  2 +-
+ prog/init/lm_sensors.init           |  2 +-
+ prog/rrd/sens_day.in                |  2 +-
+ prog/rrd/sens_week.in               |  2 +-
+ prog/rrd/summ_week.in               |  2 +-
+ prog/sensord/rrd.c                  |  3 ++-
+ prog/sensors/sensors.1              |  2 +-
+ prog/tellerstats/index.shtml        |  2 +-
+ version.h                           |  2 +-
+ 27 files changed, 56 insertions(+), 64 deletions(-)
+
+diff --git a/CHANGES b/CHANGES
+index 6efba0fd..d2e7e8d4 100644
+--- a/CHANGES
++++ b/CHANGES
+@@ -1,7 +1,9 @@
+ lm-sensors CHANGES file
+ -----------------------
+ 
+-SVN HEAD
++git HEAD
++  Development version string now contains "+git" instead of "+SVN"
++  Updated links in documentation to reflect the new home of lm_sensors
+   sensors.1: Add reference to sensors-detect
+              Document -j option (json output)
+   sensors: Add support for json output
+diff --git a/Makefile b/Makefile
+index d6f2192c..2f5859f0 100644
+--- a/Makefile
++++ b/Makefile
+@@ -226,7 +226,7 @@ manhtml:
+ 	cp $(MANPAGES) html
+ 	cd html ; \
+ 	export LOGNAME=sensors ; \
+-	export HOSTNAME=www.lm-sensors.org ; \
++	export HOSTNAME=hwmon.wiki.kernel.org ; \
+ 	man2html *.[1-8] ; \
+ 	$(RM) *.[1-8]
+ 
+diff --git a/README b/README
+index acd3c6e4..9ce510b9 100644
+--- a/README
++++ b/README
+@@ -101,14 +101,22 @@ for such programs.
+ OTHER INFORMATION
+ -----------------
+ 
+-The developers of this package can be reached through github.
+-(see https://github.com/groeck/lm-sensors). Do not hesitate to contact
+-us if you have questions, suggestions, problems, want to contribute,
+-or just want to report it works for you. But please try to
++The lm_sensors website can be found at
++https://hwmon.wiki.kernel.org/lm_sensors
++
++The developers of this package can be reached using
++* a mailing list lm-sensors <at> vger <dot> kernel <dot> org
++  (you can get information on how to subscribe, unsubscribe, and the list
++  of archives at http://vger.kernel.org/vger-lists.html#lm-sensors;
++  you do not need to be subscribed to post to the list)
++* GitHub (see https://github.com/lm-sensors/lm-sensors)
++
++Do not hesitate to contact us if you have questions, suggestions, problems,
++want to contribute, or just want to report it works for you. But please try to
+ read the documentation before you ask any questions! It's all under doc/.
+ 
+ The latest version of this package can always be found at:
+-https://github.com/groeck/lm-sensors.
++https://github.com/lm-sensors/lm-sensors.
+ 
+ LICENSE
+ -------
+diff --git a/configs/Asus/P3-PH4C.conf b/configs/Asus/P3-PH4C.conf
+index 00e5dab8..28b32578 100644
+--- a/configs/Asus/P3-PH4C.conf
++++ b/configs/Asus/P3-PH4C.conf
+@@ -5,7 +5,8 @@ chip "w83627ehf-*" "w83627dhg-*"
+     label in0 "VCore"
+     label in1 "+12V"
+     label in2 "AVCC"
+-# ACPI <http://www.lm-sensors.org/wiki/AsusFormulaHacking> says nothing about AVCC, so you might want to uncomment:
++# ACPI <https://hwmon.wiki.kernel.org/asusformulahacking> says nothing
++# about AVCC, so you might want to uncomment:
+ #ignore in2
+     label in3 "+3.3V"
+     ignore in4
+diff --git a/configs/Asus/P5B-E.conf b/configs/Asus/P5B-E.conf
+index bf62b6e9..5aa506c7 100644
+--- a/configs/Asus/P5B-E.conf
++++ b/configs/Asus/P5B-E.conf
+@@ -2,7 +2,7 @@
+ 
+ 
+ # This is the sensors.conf configuration file for ASUS P5B-E (and maybe it's different versions)
+-# Everythings based on the guide at http://www.lm-sensors.org/wiki/AsusFormulaHacking. The formulas
++# Everythings based on the guide at https://hwmon.wiki.kernel.org/asusformulahacking. The formulas
+ # and ranges are based on the /proc/acpi/dsdt readings of a P5B-E board with a E6600 CPU.
+ 
+ chip "w83627dhg-*"
+diff --git a/configs/Asus/P5N32-E_SLI_Plus.conf b/configs/Asus/P5N32-E_SLI_Plus.conf
+index 8632e099..31ced1e4 100644
+--- a/configs/Asus/P5N32-E_SLI_Plus.conf
++++ b/configs/Asus/P5N32-E_SLI_Plus.conf
+@@ -3,7 +3,7 @@
+ 
+ # Linux sensor configuration for an Asus P5N32-E SLI Plus
+ # 5/2007 s.urbanovski#ac-nancy-metz.fr
+-# (see http://www.lm-sensors.org/wiki/AsusFormulaHacking)
++# (see https://hwmon.wiki.kernel.org/asusformulahacking)
+ 
+ chip "w83791d-*"
+ 
+diff --git a/configs/Biostar/N68S+.conf b/configs/Biostar/N68S+.conf
+index be340df4..ddace3ce 100644
+--- a/configs/Biostar/N68S+.conf
++++ b/configs/Biostar/N68S+.conf
+@@ -8,7 +8,7 @@
+ # This custom configuration file should be copied to /etc/sensors.d/Biostar-N68S+.conf.
+ #
+ # Custom configuration files for some specific mainboards can be found at
+-# http://www.lm-sensors.org/wiki/Configurations
++# https://github.com/lm-sensors/lm-sensors/tree/master/configs
+ 
+ # READ THE MAN PAGE DOCUMENTATION OF 'sensors.conf' FOR MORE
+ # COMPLETE INFORMATION. ie:
+diff --git a/configs/Gigabyte/Z38MX-UD2H-B3.conf b/configs/Gigabyte/Z38MX-UD2H-B3.conf
+index 53a23764..5f8d36c5 100644
+--- a/configs/Gigabyte/Z38MX-UD2H-B3.conf
++++ b/configs/Gigabyte/Z38MX-UD2H-B3.conf
+@@ -10,7 +10,7 @@
+ # from the lm-sensors mailinglist.
+ 
+ # Questions, comments or additions? Please share on the lm-sensors mailinglist.
+-# More info at http://www.lm-sensors.org/wiki/FeedbackAndSupport
++# More info at https://hwmon.wiki.kernel.org/feedbackandsupport
+ 
+ # Hint: Use sensors -u to list all variables.
+ http://lists.lm-sensors.org/pipermail/lm-sensors/2014-January/040952.html
+diff --git a/doc/developers/lm_sensors.lsm b/doc/developers/lm_sensors.lsm
+index fd9495a4..cf239557 100644
+--- a/doc/developers/lm_sensors.lsm
++++ b/doc/developers/lm_sensors.lsm
+@@ -6,13 +6,11 @@ Description: Hardware health monitoring package for Linux. It consists of
+              a library to allow applications to read sensors data more
+              easily, and of an example program to pretty print this data.
+              Also included is a fan speed control script.
+-             http://www.lm-sensors.org/
++             https://hwmon.wiki.kernel.org/lm_sensors
+ Keywords: sensors health hardware-monitoring fan-speed
+ Author: jdelvare@suse.de (Jean Delvare)
+-Maintained-by: jdelvare@suse.de (Jean Delvare)
+-Primary-site: http://dl.lm-sensors.org/lm-sensors/releases/
+-              lm_sensors-3.4.0.tar.bz2
+-              lm_sensors-3.4.0.tar.bz2.sig
+-Alternate-site: ftp://ftp.netroedge.com/pub/lm-sensors/
++Maintained-by: olysonek@redhat.com (Ondřej Lysoněk)
++Primary-site: https://github.com
++              /lm-sensors/lm-sensors/archive/V3-4-0/lm-sensors-3-4-0.tar.gz
+ Copying-policy: GPL/LGPL
+ End
+diff --git a/doc/developers/release_checklist b/doc/developers/release_checklist
+index 9ea1ddf2..b84256b5 100644
+--- a/doc/developers/release_checklist
++++ b/doc/developers/release_checklist
+@@ -12,30 +12,16 @@ Release steps:
+ - Update doc/libsensors-API.txt and SENSORS_API_VERSION in lib/sensors.h
+ - Update version.h
+ - Commit
+-- Tag the release using SVN:
+-  svn copy http://lm-sensors.org/svn/lm-sensors/trunk http://lm-sensors.org/svn/lm-sensors/tags/V3-x-x -m "3.x.x release"
+-
+-- Move to a temporary directory and get a copy of the freshly tagged code:
+-  svn export http://lm-sensors.org/svn/lm-sensors/tags/V3-x-x lm_sensors-3.x.x
+-- Tar it up:
+-  tar -jcf lm_sensors-3.x.x.tar.bz2 lm_sensors-3.x.x
+-- Sign it:
+-  gpg -b lm_sensors-3.x.x.tar.bz2
+-- Post it:
+-  scp lm_sensors-3.x.x.tar.bz2{,.sig} devel.atrpms.net:/srv/lm-sensors.org/dl/lm-sensors/releases
+-- Set correct permissions:
+-  ssh devel.atrpms.net chmod 664 '/srv/lm-sensors.org/dl/lm-sensors/releases/lm_sensors-3.x.x.tar.bz2{,.sig}'
++- Tag the release using git:
++  git tag V3-x-x
++  git push origin V3-x-x
+ 
+ After release, remember to:
+-- Update the Download page on lm-sensors.org, then add a news item
++- Update the Download page on https://hwmon.wiki.kernel.org/download - use
++  a URL in the following format:
++  https://github.com/lm-sensors/lm-sensors/archive/V3-x-x/lm-sensors-3-x-x.tar.gz
++- Add a news item to https://hwmon.wiki.kernel.org/lm_sensors
+ - Announce on the lm-sensors mailing list
+-- Add "+SVN" to version.h and commit
+-- Mark the corresponding release milestone as complete using trac-admin
+-  e.g. 'trac-admin /srv/lm-sensors.org/trac milestone completed 3.x.x now'
+-- Create a new version for the bug tracking system using trac-admin
+-  e.g. 'trac-admin /srv/lm-sensors.org/trac version add 3.x.x now'
+-- Create a new release milestone using trac-admin
+-  e.g. 'trac-admin /srv/lm-sensors.org/trac milestone add 3.x.x+1 2012-05-10'
++- Add "+git" to version.h and commit
+ - Send lm_sensors.lsm to the LSM by mailing it to lsm@qqx.org with the
+   subject `add' (no quotes)
+-- Copy to mirrors
+diff --git a/doc/donations b/doc/donations
+index 92eea578..4a30c2d0 100644
+--- a/doc/donations
++++ b/doc/donations
+@@ -12,7 +12,7 @@ so hardware which isn't directly related to the development of a hardware
+ monitoring driver, but can be used to build test systems, is welcome too.
+ 
+ If you would like to make a donation, please contact us. See
+-http://www.lm-sensors.org/wiki/AuthorsAndContributors. Thanks!
++https://hwmon.wiki.kernel.org/authorsandcontributors. Thanks!
+ 
+ 
+ Donations are listed in chronological order. Note that the person mentioned
+diff --git a/doc/git b/doc/git
+index 1c433d2f..beeaedd8 100644
+--- a/doc/git
++++ b/doc/git
+@@ -9,7 +9,7 @@ using git. The git repository is only used for user-space tools.
+ We presume that you have git installed on your machine. To check out a
+ working copy of the code for this project use the following command:
+ 
+-git clone https://github.com/groeck/lm-sensors.git
++git clone https://github.com/lm-sensors/lm-sensors.git
+ 
+ To update the code, do a git pull from within the lm-sensors directory.
+ Please read the README and INSTALL files of your working copy for how
+diff --git a/doc/progs b/doc/progs
+index e9e997ac..0c5464df 100644
+--- a/doc/progs
++++ b/doc/progs
+@@ -6,7 +6,7 @@ These programs are generally small utilities used for debugging,
+ and installation of the lm_sensors package, and for demonstrating
+ the use of the drivers and libraries in this package.
+ For more elaborate programs (for example, GUI sensor displays),
+-see https://github.com/groeck/lm-sensors/
++see https://github.com/lm-sensors/lm-sensors/
+     http://sensors-applet.sourceforge.net/
+     https://01.org/powertop/
+     https://wpitchoune.net/psensor/
+diff --git a/etc/sensors.conf.eg b/etc/sensors.conf.eg
+index 1bd39356..15bc26f0 100644
+--- a/etc/sensors.conf.eg
++++ b/etc/sensors.conf.eg
+@@ -2003,7 +2003,7 @@ chip "f71805f-*" "f71872f-*"
+ # The configuration below is for the Kv8Pro and AV8 this is the default as this
+ # driver is developed and tested on a Kv8Pro.
+ # Configurations for many other Abit boards can be found at:
+-# http://www.lm-sensors.org/trac/wiki/Configurations/Abit
++# https://github.com/lm-sensors/lm-sensors/tree/master/configs/Abit
+ # If your motherboard isn't listed there and you create a configuration for it
+ # please add it there.
+ 
+@@ -2111,7 +2111,7 @@ chip "dme1737-*"
+ # driver is developed and tested on an Epox EP-9U1697 GLI board.
+ #
+ # Premade configurations for other boards can be found at:
+-# http://www.lm-sensors.org/trac/wiki/Configurations/
++# https://github.com/lm-sensors/lm-sensors/tree/master/configs
+ # If your motherboard isn't listed there and you create a configuration for it
+ # please add it there.
+ #
+diff --git a/lib/libsensors.3 b/lib/libsensors.3
+index bfb67c47..995c8305 100644
+--- a/lib/libsensors.3
++++ b/lib/libsensors.3
+@@ -286,5 +286,4 @@ sensors.conf(5)
+ 
+ .SH AUTHOR
+ Frodo Looijaard, Jean Delvare and others
+-http://www.lm-sensors.org/
+-
++https://hwmon.wiki.kernel.org/lm_sensors
+diff --git a/lib/sensors.conf.5 b/lib/sensors.conf.5
+index d8695239..843a2113 100644
+--- a/lib/sensors.conf.5
++++ b/lib/sensors.conf.5
+@@ -567,7 +567,4 @@ libsensors(3)
+ 
+ .SH AUTHOR
+ Frodo Looijaard and the lm_sensors group
+-http://www.lm-sensors.org/
+-
+-
+-
++https://hwmon.wiki.kernel.org/lm_sensors
+diff --git a/prog/detect/sensors-detect b/prog/detect/sensors-detect
+index b1b4b20b..0b3b0ff2 100755
+--- a/prog/detect/sensors-detect
++++ b/prog/detect/sensors-detect
+@@ -7285,7 +7285,7 @@ sub generate_modprobes
+ 		next if not @{$chips_detected{$driver}};
+ 		if ($driver eq "to-be-written") {
+ 			print "Note: there is no driver for ${$chips_detected{$driver}}[0]{chipname} yet.\n".
+-			      "Check http://www.lm-sensors.org/wiki/Devices for updates.\n\n";
++			      "Check https://hwmon.wiki.kernel.org/device_support_status for updates.\n\n";
+ 		} elsif (!is_module_builtin($driver)) {
+ 			open(local *INPUTFILE, "modprobe -l $driver 2>/dev/null |");
+ 			local $_;
+@@ -7301,7 +7301,7 @@ sub generate_modprobes
+ 			# isn't supported
+ 			if ((($? >> 8) == 0) && ! $modulefound) {
+ 				print "Warning: the required module $driver is not currently installed\n".
+-				      "on your system. Check http://www.lm-sensors.org/wiki/Devices for\n".
++				      "on your system. Check https://hwmon.wiki.kernel.org/device_support_status for\n".
+ 				      "driver availability.\n\n";
+ 			} else {
+ 				$hwmon_modules{$driver}++
+@@ -7591,7 +7591,7 @@ sub main
+ 			print "Either your system has no sensors, or they are not supported, or\n".
+ 			      "they are connected to an I2C or SMBus adapter that is not\n".
+ 			      "supported. If you find out what chips are on your board, check\n".
+-			      "http://www.lm-sensors.org/wiki/Devices for driver status.\n";
++			      "https://hwmon.wiki.kernel.org/device_support_status for driver status.\n";
+ 		}
+ 		exit;
+ 	}
+diff --git a/prog/dump/isadump.8 b/prog/dump/isadump.8
+index 6bf5ea4a..1fa09fd0 100644
+--- a/prog/dump/isadump.8
++++ b/prog/dump/isadump.8
+@@ -107,7 +107,7 @@ i2cdump(8), isaset(8)
+ 
+ .SH AUTHOR
+ Frodo Looijaard, Mark D. Studebaker, and the lm_sensors group
+-(http://www.lm-sensors.org/)
++(https://hwmon.wiki.kernel.org/lm_sensors)
+ .PP
+ This manual page was originally written by David Z Maze <dmaze@debian.org> for
+ the Debian GNU/Linux system. It was then reviewed and augmented by the lm_sensors
+diff --git a/prog/dump/isaset.8 b/prog/dump/isaset.8
+index e7bcd5db..4051af9e 100644
+--- a/prog/dump/isaset.8
++++ b/prog/dump/isaset.8
+@@ -77,7 +77,7 @@ i2cset(8), isadump(8)
+ 
+ .SH AUTHOR
+ Mark D. Studebaker, and the lm_sensors group
+-(http://www.lm-sensors.org/)
++(https://hwmon.wiki.kernel.org/lm_sensors)
+ .PP
+ This manual page was shamelessly ripped from the i2cset and isadump manual
+ pages by Jean Delvare.
+diff --git a/prog/init/lm_sensors.init b/prog/init/lm_sensors.init
+index 77172d24..2ad58abc 100755
+--- a/prog/init/lm_sensors.init
++++ b/prog/init/lm_sensors.init
+@@ -20,7 +20,7 @@
+ #    MA 02110-1301 USA.
+ 
+ # See also the lm_sensors homepage at:
+-#     http://www.lm-sensors.org
++#     https://hwmon.wiki.kernel.org/lm_sensors
+ 
+ # It uses a config file /etc/sysconfig/lm_sensors that contains the modules
+ # to be loaded/unloaded. That file is sourced into this one.
+diff --git a/prog/rrd/sens_day.in b/prog/rrd/sens_day.in
+index 75dc13bd..15412f2b 100644
+--- a/prog/rrd/sens_day.in
++++ b/prog/rrd/sens_day.in
+@@ -217,7 +217,7 @@ See also: <br>
+ </P>
+ 
+ This page generated with data and scripts from
+-<a href="http://www.lm-sensors.org/">the lm_sensors project</a>;
++<a href="https://hwmon.wiki.kernel.org/lm_sensors">the lm_sensors project</a>;
+ the data are stored in a Round Robin Database and
+ the graphs are generated by
+ <a href="http://oss.oetiker.ch/rrdtool/">
+diff --git a/prog/rrd/sens_week.in b/prog/rrd/sens_week.in
+index cce50555..2b92f655 100644
+--- a/prog/rrd/sens_week.in
++++ b/prog/rrd/sens_week.in
+@@ -217,7 +217,7 @@ See also: <br>
+ </P>
+ 
+ This page generated with data and scripts from
+-<a href="http://www.lm-sensors.org/">the lm_sensors project</a>;
++<a href="https://hwmon.wiki.kernel.org/lm_sensors">the lm_sensors project</a>;
+ the data are stored in a Round Robin Database and
+ the graphs are generated by
+ <a href="http://oss.oetiker.ch/rrdtool/">
+diff --git a/prog/rrd/summ_week.in b/prog/rrd/summ_week.in
+index 713197dc..7051d5f0 100644
+--- a/prog/rrd/summ_week.in
++++ b/prog/rrd/summ_week.in
+@@ -89,7 +89,7 @@ See also: <br>
+ </P>
+ 
+ This page generated with data and scripts from
+-<a href="http://www.lm-sensors.org/">the lm_sensors project</a>;
++<a href="https://hwmon.wiki.kernel.org/lm_sensors">the lm_sensors project</a>;
+ the data are stored in a Round Robin Database and
+ the graphs are generated by
+ <a href="http://oss.oetiker.ch/rrdtool/">
+diff --git a/prog/sensord/rrd.c b/prog/sensord/rrd.c
+index 3cde7f18..a531362b 100644
+--- a/prog/sensord/rrd.c
++++ b/prog/sensord/rrd.c
+@@ -498,7 +498,8 @@ int rrdCGI(void)
+ 	printf("<p>\n<small><b>sensord</b> by "
+ 	       "<a href=\"mailto:merlin@merlin.org\">Merlin Hughes</a>"
+ 	       ", all credit to the "
+-	       "<a href=\"http://www.lm-sensors.org/\">lm_sensors</a> "
++	       "<a href=\"https://hwmon.wiki.kernel.org/lm_sensors/\">"
++	       "lm_sensors</a> "
+ 	       "crew.</small>\n</p>\n");
+ 
+ 	printf("</body>\n</html>\n");
+diff --git a/prog/sensors/sensors.1 b/prog/sensors/sensors.1
+index ea0e238e..7d66e4b3 100644
+--- a/prog/sensors/sensors.1
++++ b/prog/sensors/sensors.1
+@@ -93,6 +93,6 @@ sensors.conf(5), sensors-detect(8).
+ 
+ .SH AUTHOR
+ Frodo Looijaard and the lm_sensors group
+-http://www.lm-sensors.org/
++https://hwmon.wiki.kernel.org/lm_sensors
+ 
+ 
+diff --git a/prog/tellerstats/index.shtml b/prog/tellerstats/index.shtml
+index 60c8ca14..1b71376e 100644
+--- a/prog/tellerstats/index.shtml
++++ b/prog/tellerstats/index.shtml
+@@ -40,7 +40,7 @@ These plots were generated <!--#echo var="LAST_MODIFIED" -->
+ </table><p>
+ 
+ This page generated with drivers and the tellerstats scripts from
+-<a href="http://www.lm-sensors.org/">The lm_sensors drivers</a>.
++<a href="https://hwmon.wiki.kernel.org/lm_sensors">The lm_sensors drivers</a>.
+ 
+ <p>
+ 
+diff --git a/version.h b/version.h
+index ad74e71b..bbdc04d9 100644
+--- a/version.h
++++ b/version.h
+@@ -1 +1 @@
+-#define LM_VERSION "3.4.0+SVN"
++#define LM_VERSION "3.4.0+git"
+-- 
+2.20.1
+

@@ -1,0 +1,54 @@
+From c28d20d19d620f42d239ed4b35139683035f11dc Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ond=C5=99ej=20Lyson=C4=9Bk?= <olysonek@redhat.com>
+Date: Thu, 17 Oct 2019 10:07:21 +0200
+Subject: [PATCH] sensors-detect: Fix printing CPU info on ppc and arm
+
+The format of /proc/cpuinfo on other arches is different from the
+format on x86. Modify the print_cpu_info function to handle arm and
+ppc.
+
+This change also eliminates Perl warnings caused by non-existent
+elements in the %cpu hash:
+Use of uninitialized value in concatenation (.) or string at
+./prog/detect/sensors-detect line 3124.
+
+Based on a patch from Changqing Li <changqing.li@windriver.com>,
+GitHub PR: https://github.com/lm-sensors/lm-sensors/pull/168
+---
+ prog/detect/sensors-detect | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/prog/detect/sensors-detect b/prog/detect/sensors-detect
+index c2cbe9b9..78b0b5a1 100755
+--- a/prog/detect/sensors-detect
++++ b/prog/detect/sensors-detect
+@@ -3130,7 +3130,7 @@ sub initialize_cpu_list
+ 			};
+ 			next;
+ 		}
+-		if (m/^(vendor_id|cpu family|model|model name|stepping|cpuid level)\s*:\s*(.+)$/) {
++		if (m/^(vendor_id|cpu family|model|model name|stepping|cpuid level|cpu|revision)\s*:\s*(.+)$/) {
+ 			my $k = $1;
+ 			my $v = $2;
+ 			$v =~ s/\s+/ /g;	# Merge multiple spaces
+@@ -3146,7 +3146,16 @@ sub initialize_cpu_list
+ sub print_cpu_info
+ {
+ 	my $cpu = $cpu[0];
+-	print "# Processor: $cpu->{'model name'} ($cpu->{'cpu family'}/$cpu->{model}/$cpu->{stepping})\n";
++	if ($kernel_arch =~ m/^ppc(64(le)?)?$/) {
++		print "# Processor: $cpu->{cpu} ($cpu->{revision})\n";
++	} elsif ($kernel_arch =~ m/^arm/) {
++		print "# Processor: $cpu->{'model name'}\n";
++	} elsif (exists $cpu->{'model name'} && exists $cpu->{'cpu family'}
++	         && exists $cpu->{'model'} && exists $cpu->{'stepping'}) {
++		print "# Processor: $cpu->{'model name'} ($cpu->{'cpu family'}/$cpu->{model}/$cpu->{stepping})\n";
++	} else {
++		print "# Cannot show processor info on $kernel_arch architecture.\n";
++	}
+ }
+ 
+ # @i2c_adapters is a list of references to hashes, one hash per I2C/SMBus
+-- 
+2.20.1
+
