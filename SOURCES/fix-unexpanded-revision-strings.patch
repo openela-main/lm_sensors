@@ -1,0 +1,85 @@
+diff --git a/doc/developers/release_checklist b/doc/developers/release_checklist
+index b84256b5..a97745e1 100644
+--- a/doc/developers/release_checklist
++++ b/doc/developers/release_checklist
+@@ -10,7 +10,7 @@ Release steps:
+ - Update the CHANGES file (set version and release date)
+ - Update doc/developers/lm_sensors.lsm (Version, Entered-date and Primary-site)
+ - Update doc/libsensors-API.txt and SENSORS_API_VERSION in lib/sensors.h
+-- Update version.h
++- grep for LM_VERSION and update values of the constants
+ - Commit
+ - Tag the release using git:
+   git tag V3-x-x
+@@ -22,6 +22,7 @@ After release, remember to:
+   https://github.com/lm-sensors/lm-sensors/archive/V3-x-x/lm-sensors-3-x-x.tar.gz
+ - Add a news item to https://hwmon.wiki.kernel.org/lm_sensors
+ - Announce on the lm-sensors mailing list
+-- Add "+git" to version.h and commit
++- grep for LM_VERSION and add "+git" to the values of the constants
++- Commit
+ - Send lm_sensors.lsm to the LSM by mailing it to lsm@qqx.org with the
+   subject `add' (no quotes)
+diff --git a/prog/detect/sensors-detect b/prog/detect/sensors-detect
+index 78b0b5a1..07df0fbe 100755
+--- a/prog/detect/sensors-detect
++++ b/prog/detect/sensors-detect
+@@ -38,12 +38,9 @@ foreach ('/usr/sbin', '/usr/local/sbin', '/sbin') {
+ #########################
+ 
+ use constant NO_CACHE => 1;
++use constant LM_VERSION => '3.4.0+git';
+ use vars qw(@pci_adapters @chip_ids @ipmi_ifs @non_hwmon_chip_ids
+-	    $i2c_addresses_to_scan $revision @i2c_byte_cache %opt);
+-
+-$revision = '$Revision$ ($Date$)';
+-$revision =~ s/\$\w+: (.*?) \$/$1/g;
+-$revision =~ s/ \([^()]*\)//;
++	    $i2c_addresses_to_scan @i2c_byte_cache %opt);
+ 
+ # This is the list of SMBus or I2C adapters we recognize by their PCI
+ # signature. This is an easy and fast way to determine which SMBus or I2C
+@@ -7511,7 +7508,7 @@ sub main
+ 		system("/sbin/service", "lm_sensors", "stop");
+ 	}
+ 
+-	print "# sensors-detect revision $revision\n";
++	print "# sensors-detect version ".LM_VERSION."\n";
+ 	initialize_dmi_data();
+ 	print_dmi_summary();
+ 	print_kernel_version();
+diff --git a/prog/init/fancontrol.init b/prog/init/fancontrol.init
+index eabe734c..8ab2c929 100755
+--- a/prog/init/fancontrol.init
++++ b/prog/init/fancontrol.init
+@@ -1,7 +1,5 @@
+ #!/bin/sh
+ #
+-# $Id$
+-#
+ # fancontrol
+ #
+ # chkconfig: 2345 90 01
+diff --git a/prog/pwm/pwmconfig b/prog/pwm/pwmconfig
+index a40acd5c..3ecdca5b 100755
+--- a/prog/pwm/pwmconfig
++++ b/prog/pwm/pwmconfig
+@@ -29,8 +29,7 @@
+ #
+ #
+ 
+-REVISION=$(echo '$Revision$' | cut -d' ' -f2)
+-REVDATE=$(echo '$Date$' | cut -d' ' -f2)
++LM_VERSION='3.4.0+git'
+ PIDFILE="/var/run/fancontrol.pid"
+ 
+ if [ -f "$PIDFILE" ]
+@@ -48,7 +47,7 @@ then
+ 	exit 1
+ fi
+ 
+-echo "# pwmconfig revision $REVISION ($REVDATE)"
++echo "# pwmconfig version $LM_VERSION"
+ echo 'This program will search your sensors for pulse width modulation (pwm)'
+ echo 'controls, and test each one to see if it controls a fan on'
+ echo 'your motherboard. Note that many motherboards do not have pwm'
